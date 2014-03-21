@@ -1,5 +1,6 @@
 {
-  "name": "baseFieldView",
+  "name": "base-field-view",
+  "private": true,
   "version": "0.0.0",
   "description": "baseFieldView =============",
   "main": "index.js",
@@ -21,6 +22,7 @@
     "backbone-subviews": "~0.7.0",
     "backbone-view-options": "~0.2.2",
     "underscore": "~1.6.0",
+    "jquery-field-views" : "git+https://x-oath-basic:a9dcd24357590f5bbf6184c0b48f24c209e8e630@github.com/rotundasoftware/jquery-field-views.git",
     "jquery": "~2.1.0"
   }
 }
