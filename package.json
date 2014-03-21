@@ -1,0 +1,26 @@
+{
+  "name": "baseFieldView",
+  "version": "0.0.0",
+  "description": "baseFieldView =============",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rotundasoftware/baseFieldView.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rotundasoftware/baseFieldView/issues"
+  },
+  "homepage": "https://github.com/rotundasoftware/baseFieldView",
+  "dependencies": {
+    "backbone": "~1.1.2",
+    "backbone-subviews": "~0.7.0",
+    "backbone-view-options": "~0.2.2",
+    "underscore": "~1.6.0",
+    "jquery": "~2.1.0"
+  }
+}
