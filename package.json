@@ -19,10 +19,11 @@
   "homepage": "https://github.com/rotundasoftware/baseFieldView",
   "dependencies": {
     "backbone": "~1.1.2",
+    "backbone-handle": "^0.1.0",
     "backbone-subviews": "~0.7.0",
     "backbone-view-options": "~0.2.2",
-    "underscore": "~1.6.0",
-    "jquery-field-views" : "git+https://x-oath-basic:a9dcd24357590f5bbf6184c0b48f24c209e8e630@github.com/rotundasoftware/jquery-field-views.git",
-    "jquery": "~2.1.0"
+    "jquery": "~2.1.0",
+    "jquery-field-views": "git+https://x-oath-basic:a9dcd24357590f5bbf6184c0b48f24c209e8e630@github.com/rotundasoftware/jquery-field-views.git",
+    "underscore": "~1.6.0"
   }
 }

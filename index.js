@@ -6,6 +6,7 @@ require( 'jquery-field-views' );
 Backbone.$ = $;
 Backbone.Subviews = require( 'backbone-subviews' );
 Backbone.ViewOptions = require( 'backbone-view-options' );
+Backbone.Handle = require( 'backbone-handle' );
 // var kBaseFieldViewOptions = [ "name", "width" ];
 
 module.exports = Backbone.View.extend( {
@@ -14,13 +15,15 @@ module.exports = Backbone.View.extend( {
 	options : [ "name", "width" ],
 
 	constructor : function( options ) {
-		Backbone.ViewOptions.add( this, "_onOptionsChanged" );
+		Backbone.View.prototype.constructor.apply( this, arguments );
+		// Backbone.ViewOptions.add( this, "_onOptionsChanged" );
+		Backbone.ViewOptions.add( this );
 		this.setOptions( options );
 		// this.options = _.union( _.result( this, "options" ) || [], kBaseFieldViewOptions );
-
-		Backbone.View.prototype.constructor.apply( this, arguments );
-
+		
+		Backbone.Handle.add( this );
 		Backbone.Subviews.add( this );
+		
 	},
 
 	initialize: function( options ) {
@@ -40,6 +43,10 @@ module.exports = Backbone.View.extend( {
 
 	templateHelpers : function() {
 		return this.getOptions();
+	},
+
+	render : function() {
+		this.$el.html( this.template( this.getOptions() ) );
 	},
 
 	onRender : function() {
