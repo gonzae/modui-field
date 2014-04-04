@@ -1,5 +1,6 @@
 
 var _ = require( 'underscore' );
+
 var $ = require( 'jquery' );
 var Backbone = require( 'backbone' );
 require( 'jquery-field-views' );
@@ -16,11 +17,9 @@ module.exports = Backbone.View.extend( {
 
 	constructor : function( options ) {
 		Backbone.View.prototype.constructor.apply( this, arguments );
-		// Backbone.ViewOptions.add( this, "_onOptionsChanged" );
 		Backbone.ViewOptions.add( this );
 		this.setOptions( options );
-		// this.options = _.union( _.result( this, "options" ) || [], kBaseFieldViewOptions );
-		
+
 		Backbone.Handle.add( this );
 		Backbone.Subviews.add( this );
 		
@@ -37,16 +36,11 @@ module.exports = Backbone.View.extend( {
 		this._value = this._coerceToValidValue( this._value );
 
 		this.on( "change", this._processValueChange, this );
-
-		//this.listenTo( this.model, "change", this.render );  // no need for this, as of yet. also note if type changes, we need to change view class!
-	},
-
-	templateHelpers : function() {
-		return this.getOptions();
 	},
 
 	render : function() {
 		this.$el.html( this.template( this.getOptions() ) );
+		// this.onRender();
 	},
 
 	onRender : function() {
@@ -191,10 +185,13 @@ module.exports = Backbone.View.extend( {
 	},
 
 	onSubviewsRendered : function() {
+
+		this.onRender();
 		// _pushValue needs to go in onSubviewsRendered, in case additional ui decoration (like 
 		// initializing jquery ui elements) is performed by descendant classes 
 		// after calling parent's "onRender" function. If we just did _pushValue 
 		// at the end of render() function, that logic would not yet be executed.
+		
 
 		this._pushValue( this._value );
 	},
