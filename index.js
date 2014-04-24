@@ -22,7 +22,8 @@ module.exports = FieldView = baseView.extend( {
 
 	render : function() {
 		this.$el.html( this.template( this.getOptions() ) );
-
+		this.resolveHandles();
+		
 		this.$el.data( 'view', this );
 		this.$el.attr( 'data-name', this.fieldName );
 
@@ -161,13 +162,10 @@ module.exports = FieldView = baseView.extend( {
 	},
 
 	_onSubviewsRendered : function() {
-
-		this.onRender();
-		// _pushValue needs to go in onSubviewsRendered, in case additional ui decoration (like 
+		// _pushValue needs to go in _onSubviewsRendered, in case additional ui decoration (like 
 		// initializing jquery ui elements) is performed by descendant classes 
 		// after calling parent's 'onRender' function. If we just did _pushValue 
 		// at the end of render() function, that logic would not yet be executed.
-		
 
 		this._pushValue( this._value );
 	},
