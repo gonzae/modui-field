@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/rotundasoftware/baseFieldView",
   "dependencies": {
-    "modui-base": "git+https://x-oath-basic:a9dcd24357590f5bbf6184c0b48f24c209e8e630@github.com/rotundasoftware/modui-base.git",
+    "modui-base": "~0.0.0",
     "underscore": "~1.6.0"
   }
 }
