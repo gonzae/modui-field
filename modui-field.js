@@ -1,14 +1,15 @@
 
 var _ = require( 'underscore' );
-var baseView = require( 'modui-base' );
+var BaseView = require( 'modui-base' );
+var $ = require( 'jquery' );
 
-module.exports = FieldView = baseView.extend( {
+module.exports = FieldView = BaseView.extend( {
 	className : 'field-view',
 
 	options : [ 'name', 'width' ],
 
 	initialize: function( options ) {
-		baseView.prototype.initialize.apply( this, arguments );
+		BaseView.prototype.initialize.apply( this, arguments );
 
 		if( options ) this._value = options.value;
 
@@ -21,8 +22,7 @@ module.exports = FieldView = baseView.extend( {
 	},
 
 	render : function() {
-		this.$el.html( this.template( this.getOptions() ) );
-		this.resolveHandles();
+		BaseView.prototype.render.apply( this, arguments );
 		
 		this.$el.data( 'view', this );
 		this.$el.attr( 'data-name', this.fieldName );
@@ -30,7 +30,7 @@ module.exports = FieldView = baseView.extend( {
 		if( this.width === 'stretch' && _.isFunction( this.$el.stretch ) )
 			this.$el.stretch();
 		else if( ! _.isUndefined( this.width ) )
-			this.$el.width( this.width - this.$el.paddingWidth() );
+			this.$el.width( this.width ); // temporarily removed "- this.$el.paddingWidth()"
 	},
 
 	setValue : function( newValue, options ) {
@@ -124,6 +124,10 @@ module.exports = FieldView = baseView.extend( {
 		return formErrors;
 	},
 
+	_renderTemplate : function( templateData ) {
+		this.$el.html( this.template.render( templateData ) );
+	},
+
 	_pullValue : function() {
 		var childFieldViews = this._getChildFieldViews();
 
@@ -167,7 +171,8 @@ module.exports = FieldView = baseView.extend( {
 		// after calling parent's 'onRender' function. If we just did _pushValue 
 		// at the end of render() function, that logic would not yet be executed.
 
-		this._pushValue( this._value );
+		if( ! _.isUndefined( this._value ) )
+			this._pushValue( this._value );
 	},
 
 	_processValueChange : function() {
@@ -184,14 +189,14 @@ module.exports = FieldView = baseView.extend( {
 	},
 
 	_getChildFieldViews : function( options ) {
-		return _.values( this.$el.children().fieldViews( 'find' ) );
+		return _.values( FieldView.find( this.$el.children() ) );
 	}
 }, {
 	find : function( els, options ) {
 		var viewElements = els.filter( '.field-view' );
 		viewElements = viewElements.add( els.find( '.field-view' ) );
 
-		options = $.extend( {
+		options = _.extend( {
 			includeHiddenViews : false,
 			excludeUnavailableDependents : true
 		}, options );
@@ -228,14 +233,13 @@ module.exports = FieldView = baseView.extend( {
 		return fieldViews;
 	},
 
-	get : function( options ) {
-		options = $.extend( {
+	get : function( els, options ) {
+		options = _.extend( {
 			includeHiddenViews : false,
 			excludeUnavailableDependents : true
 		}, options );
 
-		var $this = $( this );
-		var fieldViews = FieldView.find( $this, options );
+		var fieldViews = FieldView.find( els, options );
 		var valueHash = {};
 
 		for( var i = 0, len = fieldViews.length; i < len; i++ ) {
@@ -247,17 +251,16 @@ module.exports = FieldView = baseView.extend( {
 		return valueHash;
 	},
 
-	set : function( suppliedValues, options ) {
+	set : function( els, suppliedValues, options ) {
 		if( suppliedValues === undefined ) throw new Error( 'Undefined hash of values to use for setFields.' );
 
-		options = $.extend( {
+		options = _.extend( {
 			includeHiddenViews : false,
 			resetUnsuppliedValuesToDefaults : true,
 			excludeUnavailableDependents : false	// otherwise we might exclude a dependent based on the current value of its 'parent', but we may be changing that value!
 		}, options );
 
-		var $this = $( this );
-		var fieldViews = FieldView.find( $this, options );
+		var fieldViews = FieldView.find( els, options );
 
 		for( var i = 0, len = fieldViews.length; i < len; i++ ) {
 			var thisFieldView = fieldViews[ i ];
@@ -273,26 +276,18 @@ module.exports = FieldView = baseView.extend( {
 			if( newValue !== undefined )
 				thisFieldView.setValue( newValue );
 		}
-
-		return this;
-	},
-
-	align : function( options ) {
-		var $this = $( this );
-
-		var fieldViews = FieldView.find( $this, options );
-
-		var maxLabelWidth =_.max( _.map( fieldViews, function( thisFieldView ) {
-			if( ! thisFieldView.ui.leftLabelDiv ) return 0;
-
-			thisFieldView.ui.leftLabelDiv.css( "width", "auto" );
-			return thisFieldView._leftLabelIsTooWideToInline() ? kMinBodyIndent : thisFieldView.ui.leftLabelDiv.width() + 1;
-		} ) );
-
-		_.each( fieldViews, function( thisFieldView ) {
-			thisFieldView.align( maxLabelWidth );
-		} );
-
-		return maxLabelWidth;
 	}
 } );
+
+$.fn.fieldViews = function( action ) {
+	var args = Array.prototype.slice.call( arguments, 1 );
+	args.unshift( this );
+
+	var actions = {
+		get : FieldView.get,
+		set : FieldView.set,
+		find : FieldView.find
+	};
+
+	return actions[ action ].apply( this, args );
+};
