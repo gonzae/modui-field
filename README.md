@@ -3,14 +3,14 @@
 modui-field is an abstract class that is extended to provide a consistent interface for getting, setting, and validating values of modui components. Imagine we have a form that contains name, age, and locationn fields. If all our fields extend modui-field, setting the values of the fields in the form is as easy as:
 
 ```javascript
-$( '.my-form' ).moduiField( "set", {
-	name : "John Elliot",
+$( '.my-form' ).moduiField( 'set', {
+	name : 'John Elliot',
 	age : 33,
 	location : {
-		street : "23 Monkey Road"
-		city : "Ubud",
-		state : "Gianyar",
-		country : "Bali"
+		street : '23 Monkey Road'
+		city : 'Ubud',
+		state : 'Gianyar',
+		country : 'Bali'
 	}
 } );
 ```
