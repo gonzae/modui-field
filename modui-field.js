@@ -14,7 +14,7 @@ module.exports = FieldView = BaseView.extend( {
 		if( options ) this._value = options.value;
 
 		if( _.isUndefined( this._value ) )
-			this.resetValueToDefault();
+			this._resetValueToDefault();
 
 		this._value = this._coerceToValidValue( this._value );
 
@@ -73,12 +73,6 @@ module.exports = FieldView = BaseView.extend( {
 		else return this._value;
 	},
 
-	resetValueToDefault : function() {
-		var newVal = _.isObject( this.defaultValue ) ? _.clone( this.defaultValue ) : this.defaultValue;
-
-		this.setValue( newVal, { silent : false } );
-	},
-
 	processFormErrors : function() {
 		return this.showFormErrors( this.getFormErrors() );
 	},
@@ -102,10 +96,7 @@ module.exports = FieldView = BaseView.extend( {
 			}
 		} );
 
-		if( formErrors.length > 0 )
-			return formErrors;
-		else
-			return null;
+		return formErrors;
 	},
 
 	showFormErrors : function( formErrors ) {
@@ -124,8 +115,10 @@ module.exports = FieldView = BaseView.extend( {
 		return formErrors;
 	},
 
-	_renderTemplate : function( templateData ) {
-		this.$el.html( this.template.render( templateData ) );
+	_resetValueToDefault : function() {
+		var newVal = _.isObject( this.defaultValue ) ? _.clone( this.defaultValue ) : this.defaultValue;
+
+		this.setValue( newVal, { silent : false } );
 	},
 
 	_pullValue : function() {
@@ -147,9 +140,8 @@ module.exports = FieldView = BaseView.extend( {
 			if( ! _.isUndefined( value[ thisChildFieldView.name ] ) )
 				thisChildFieldView.setValue( value[ thisChildFieldView.name ] );
 			else
-				thisChildFieldView.resetValueToDefault();
+				thisChildFieldView._resetValueToDefault();
 		} );
-
 	},
 
 	_coerceToValidValue : function( newValue ) {
@@ -160,7 +152,7 @@ module.exports = FieldView = BaseView.extend( {
 		// make sure our value is still valid!
 		var newValue = this._coerceToValidValue( this._value );
 		if( !_.isUndefined( newValue ) ) this.setValue( newValue );
-		else this.resetValueToDefault();
+		else this._resetValueToDefault();
 
 		this.render();
 	},
@@ -190,6 +182,10 @@ module.exports = FieldView = BaseView.extend( {
 
 	_getChildFieldViews : function( options ) {
 		return _.values( FieldView.find( this.$el.children() ) );
+	},
+
+	_renderTemplate : function( templateData ) {
+		this.$el.html( this.template.render( templateData ) );
 	}
 }, {
 	find : function( els, options ) {
@@ -270,7 +266,7 @@ module.exports = FieldView = BaseView.extend( {
 			if( newValue === undefined &&
 				options.resetUnsuppliedValuesToDefaults )
 			{
-				thisFieldView.resetValueToDefault();
+				thisFieldView._resetValueToDefault();
 			}
 
 			if( newValue !== undefined )
