@@ -23,7 +23,7 @@ Field values can be any type. They can even be composed of smaller values that c
 
 #### `field.getValue( options )`
 
-Return the current value of the field.
+Return the current value of the field. If `immediate : true` is in options, the value returned is pulled directly from the representation of the field's value that resides in the DOM (via `field._pullValue()`). The option can be used to pull the current value from a text field that is currently being edited.
 
 #### `field.setValue( newValue, options )`
 
