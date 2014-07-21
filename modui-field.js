@@ -3,6 +3,8 @@ var _ = require( 'underscore' );
 var BaseView = require( 'modui-base' );
 var $ = require( 'jquery' );
 
+var FieldView;
+
 module.exports = FieldView = BaseView.extend( {
 	className : 'field-view',
 
@@ -30,7 +32,7 @@ module.exports = FieldView = BaseView.extend( {
 		if( this.width === 'stretch' && _.isFunction( this.$el.stretch ) )
 			this.$el.stretch();
 		else if( ! _.isUndefined( this.width ) )
-			this.$el.width( this.width ); // temporarily removed "- this.$el.paddingWidth()"
+			this.$el.width( this.width - ( this.$el.innerWidth() - this.$el.width() ) );
 	},
 
 	setValue : function( newValue, options ) {
@@ -105,7 +107,7 @@ module.exports = FieldView = BaseView.extend( {
 		this.$el.toggleClass( 'has-form-errors', !!formErrors );
 
 		_.each( this._getChildFieldViews(), function( thisChildFieldView ) {
-			thisChildFieldViewError = _.findWhere( formErrors, { type : 'childFieldViewError', childFieldView : thisChildFieldView } );
+			var thisChildFieldViewError = _.findWhere( formErrors, { type : 'childFieldViewError', childFieldView : thisChildFieldView } );
 			if( thisChildFieldViewError )
 				thisChildFieldView.showFormErrors( thisChildFieldViewError.errors );
 			else
@@ -185,7 +187,9 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	_renderTemplate : function( templateData ) {
-		this.$el.html( this.template.render( templateData ) );
+		// kind of a hack to let us use both underscore and nunjucks. should probably
+		// put this in our base view mixin, once we change base view to be a mixin, that is
+		this.$el.html( this.template.render ? this.template.render( templateData ) : this.template( templateData ) );
 	}
 }, {
 	find : function( els, options ) {
