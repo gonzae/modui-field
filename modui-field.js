@@ -6,7 +6,7 @@ var $ = require( 'jquery' );
 var FieldView;
 
 module.exports = FieldView = BaseView.extend( {
-	className : 'field-view',
+	className : 'modui-field',
 
 	options : [ 'name', 'width' ],
 
@@ -55,13 +55,17 @@ module.exports = FieldView = BaseView.extend( {
 			if( options.pushValue ) this._pushValue( this._value );
 
 		if( ! options.silent && ! _.isEqual( oldValue, newValue ) )
-			this.trigger( 'change' );
+			this.spawn( 'change' );
 
-		// Process form errors if they have been processed previously.  It is important to call this after
+		// Once we have already attempted a submit for this field view, we update the ui for displayed form errors
+		// as soon as the value changes from then on. That way people see when they have corrected their
+		// mistakes, and the mistakes will appear immediately if they are re-done. It is important to do this after
 		// the change event is spawned so that any changes made to the UI by other code in response to this change,
-		// such as hiding or showing fields which can impact processFormErrors, are done before processFormErrors is called.
-		if( this.formErrorsVisible )
-			this.processFormErrors();
+		// such as hiding or showing fields which can impact form errors, are done before we do it.
+		if( this.submitAttempted ) {
+			this.$el.removeClass( "submit-just-attempted" );
+			this.showFormErrors( this.getFormErrors() );
+		}
 
 		return true;
 	},
@@ -79,42 +83,34 @@ module.exports = FieldView = BaseView.extend( {
 		return this.showFormErrors( this.getFormErrors() );
 	},
 
-	getFormErrors : function() {
-		if( ! this.subviews )
-			return null;
-
-		var formErrors = [];
-		var childFieldViews = this._getChildFieldViews();
-
-		_.each( childFieldViews, function( thisFieldView ) {
-			var childErrors = thisFieldView.getFormErrors();
-
-			if( childErrors ) {
-				formErrors.push( {
-					type : 'childFieldViewError',
-					errors : childErrors,
-					childFieldView : thisFieldView
-				} );
-			}
-		} );
-
-		return formErrors;
+	getFormErrors : function( options ) {
+		return [];
 	},
 
 	showFormErrors : function( formErrors ) {
-		this.formErrorsVisible = true;
+		this.$el.toggleClass( "has-form-errors", formErrors.length > 0 );
+	},
 
-		this.$el.toggleClass( 'has-form-errors', !!formErrors );
+	attemptSubmit : function() {
+		var _this = this;
+		
+		var canSubmit = true;
 
-		_.each( this._getChildFieldViews(), function( thisChildFieldView ) {
-			var thisChildFieldViewError = _.findWhere( formErrors, { type : 'childFieldViewError', childFieldView : thisChildFieldView } );
-			if( thisChildFieldViewError )
-				thisChildFieldView.showFormErrors( thisChildFieldViewError.errors );
-			else
-				thisChildFieldView.showFormErrors( null );
+		var childFieldViews = this._getChildFieldViews();
+		_.each( childFieldViews, function( thisFieldView ) {
+			if( ! thisFieldView.attemptSubmit() ) canSubmit = false;
 		} );
 
-		return formErrors;
+		var formErrors = this.getFormErrors();
+		this.showFormErrors( formErrors );
+		if( formErrors.length ) canSubmit = false;
+
+		this.$el.removeClass( "submit-just-attempted" );
+		_.defer( function() { _this.$el.addClass( "submit-just-attempted" ); } );
+
+		this.submitAttempted = true;
+
+		return canSubmit;
 	},
 
 	_resetValueToDefault : function() {
