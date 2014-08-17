@@ -189,8 +189,8 @@ module.exports = FieldView = BaseView.extend( {
 	}
 }, {
 	find : function( els, options ) {
-		var viewElements = els.filter( '.field-view' );
-		viewElements = viewElements.add( els.find( '.field-view' ) );
+		var viewElements = els.filter( '.modui-field' );
+		viewElements = viewElements.add( els.find( '.modui-field' ) );
 
 		options = _.extend( {
 			includeHiddenViews : false,
@@ -199,10 +199,10 @@ module.exports = FieldView = BaseView.extend( {
 
 		if( ! options.includeHiddenViews ) viewElements = viewElements.filter( ':visible' );
 
-		// get rid of 'sub-field-views'.. that is, do not include field views that are children of other field views
+		// get rid of 'sub-modui-fields'.. that is, do not include field views that are children of other field views
 		var newViewElements = $( viewElements );
 		viewElements.each( function() {
-			newViewElements = newViewElements.not( $( this ).find( '.field-view' ) );
+			newViewElements = newViewElements.not( $( this ).find( '.modui-field' ) );
 		} );
 		viewElements = newViewElements;
 
