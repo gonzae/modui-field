@@ -75,7 +75,7 @@ module.exports = FieldView = BaseView.extend( {
 			immediate : false
 		} );
 
-		if( options.immediate ) return this._pullValue();
+		if( options.immediate ) return this._coerceToValidValue( this._pullValue() );
 		else return this._value;
 	},
 
