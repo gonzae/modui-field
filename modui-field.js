@@ -19,8 +19,6 @@ module.exports = FieldView = BaseView.extend( {
 			this._resetValueToDefault();
 
 		this._value = this._coerceToValidValue( this._value );
-
-		this.on( 'change', this._processValueChange, this );
 	},
 
 	render : function() {
