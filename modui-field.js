@@ -22,37 +22,46 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	render : function() {
-		BaseView.prototype.render.apply( this, arguments );
-		
-		this.$el.data( 'view', this );
-		this.$el.attr( 'data-name', this.fieldName );
-
 		if( this.width === 'stretch' && _.isFunction( this.$el.stretch ) )
 			this.$el.stretch();
 		else if( ! _.isUndefined( this.width ) )
 			this.$el.width( this.width - ( this.$el.innerWidth() - this.$el.width() ) );
+		
+		BaseView.prototype.render.apply( this, arguments );
+		
+		this.$el.data( 'view', this );
+		this.$el.attr( 'data-name', this.fieldName );
 	},
 
-	setValue : function( newValue, options ) {
+	setValue : function( originalNewValue, options ) {
 		options = _.defaults( {}, options, {
 			silent : false,
-			// pushValue is an internal option used by _processValueChange.  It is set to false when the
-			// new value and the coerced value are the same meaning that the value we pulled is the same
-			// as the value being stored so there is no need to push the value (usually means updating the UI isn't necessary)
-			pushValue : true
 		} );
 
-		newValue = this._coerceToValidValue( newValue );
-		if( _.isUndefined( newValue ) ) return false; // could not coerce to value valid
+		var coercedNewValue = this._coerceToValidValue( originalNewValue );
+		var valueDidNotChange = true;
 
-		var oldValue = this._value;
-		this._value = newValue;
+		if( ! _.isUndefined( coercedNewValue ) ) {
+			valueDidNotChange = _.isEqual( this._value, coercedNewValue );
+			this._value = coercedNewValue;
+		}
 
-		if( this.$el.children().length > 0 )
-			// don't push value if we have not yet rendered ourselves!
-			if( options.pushValue ) this._pushValue( this._value );
+		if( this.$el.children().length > 0 ) {
+			// make sure our ui is in sync. If the new value is invalid (in which
+			// case this._value is still our old value), or if it needed to be
+			// coerced, then we will need to push our new value to the ui.
+			
+			// note pulling the value here means that when _processValueChange is called we
+			// actually do TWO pulls. We could pass this through as an internal option
+			// but seems a little weird. There is probably next to no performance
+			// hit by pulling the value twice so we'll leave this as-is for now.
+			
+			if( ! _.isEqual( this._pullValue(), this._value ) ) {
+				this._pushValue( this._value );
+			}
+		}
 
-		if( ! options.silent && ! _.isEqual( oldValue, newValue ) )
+		if( ! options.silent && ! valueDidNotChange )
 			this.spawn( 'change' );
 
 		// Once we have already attempted a submit for this field view, we update the ui for displayed form errors
@@ -74,7 +83,7 @@ module.exports = FieldView = BaseView.extend( {
 		} );
 
 		if( options.immediate ) return this._coerceToValidValue( this._pullValue() );
-		else return this._value;
+		else return _.clone( this._value );
 	},
 
 	processFormErrors : function() {
@@ -164,16 +173,18 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	_processValueChange : function() {
-		var originalNewValue = this._pullValue();
-		var coercedNewValue = this._coerceToValidValue( originalNewValue );
+		this.setValue( this._pullValue() );
+
+		// var originalNewValue = this._pullValue();
+		// var coercedNewValue = this._coerceToValidValue( originalNewValue );
 		
-		if( _.isUndefined( coercedNewValue ) )
-			// the value is invalid! revert the UI to our current value
-			this._pushValue( this._value );
-		else {
-			var needToPushValueWithCoercedValue = ! _.isEqual( originalNewValue, coercedNewValue );
-			this.setValue( coercedNewValue, { silent : false, pushValue : needToPushValueWithCoercedValue } );
-		}
+		// if( _.isUndefined( coercedNewValue ) )
+		// 	// the value is invalid! revert the UI to our current value
+		// 	this._pushValue( this._value );
+		// else {
+		// 	var needToPushValueWithCoercedValue = ! _.isEqual( originalNewValue, coercedNewValue );
+		// 	this.setValue( coercedNewValue, { pushValue : needToPushValueWithCoercedValue } );
+		// }
 	},
 
 	_getChildFieldViews : function( options ) {
