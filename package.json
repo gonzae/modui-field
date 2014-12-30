@@ -2,7 +2,7 @@
   "name": "modui-field",
   "version": "0.0.5",
   "description": "baseFieldView =============",
-  "main": "modui-field.js",
+  "main": "moduiField.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

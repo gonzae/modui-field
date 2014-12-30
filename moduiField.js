@@ -18,6 +18,8 @@ module.exports = FieldView = BaseView.extend( {
 		if( _.isUndefined( this._value ) )
 			this._resetValueToDefault();
 
+		if( this.name ) this.$el.attr( 'data-field-name', this.name );
+
 		this._value = this._coerceToValidValue( this._value );
 	},
 
@@ -83,11 +85,14 @@ module.exports = FieldView = BaseView.extend( {
 		} );
 
 		if( options.immediate ) return this._coerceToValidValue( this._pullValue() );
-		else return _.clone( this._value );
-	},
+		else if( _.isUndefined( this._value ) ) {
+			// this is what happens when no default value is specified for a field.
+			// the field's value is left undefined until the first attempt to get the
+			// value, at which time it is set based on the representation in the ui
+			this._value = this._coerceToValidValue( this._pullValue() );
+		}
 
-	processFormErrors : function() {
-		return this.showFormErrors( this.getFormErrors() );
+		return _.clone( this._value );
 	},
 
 	getFormErrors : function( options ) {
@@ -174,17 +179,6 @@ module.exports = FieldView = BaseView.extend( {
 
 	_processValueChange : function() {
 		this.setValue( this._pullValue() );
-
-		// var originalNewValue = this._pullValue();
-		// var coercedNewValue = this._coerceToValidValue( originalNewValue );
-		
-		// if( _.isUndefined( coercedNewValue ) )
-		// 	// the value is invalid! revert the UI to our current value
-		// 	this._pushValue( this._value );
-		// else {
-		// 	var needToPushValueWithCoercedValue = ! _.isEqual( originalNewValue, coercedNewValue );
-		// 	this.setValue( coercedNewValue, { pushValue : needToPushValueWithCoercedValue } );
-		// }
 	},
 
 	_getChildFieldViews : function( options ) {
@@ -250,7 +244,7 @@ module.exports = FieldView = BaseView.extend( {
 		for( var i = 0, len = fieldViews.length; i < len; i++ ) {
 			var thisFieldView = fieldViews[ i ];
 			var thisFieldViewIdent = thisFieldView.name;
-			valueHash[ thisFieldViewIdent ] = thisFieldView.getValue();
+			if( thisFieldViewIdent ) valueHash[ thisFieldViewIdent ] = thisFieldView.getValue();
 		}
 
 		return valueHash;
@@ -270,16 +264,18 @@ module.exports = FieldView = BaseView.extend( {
 		for( var i = 0, len = fieldViews.length; i < len; i++ ) {
 			var thisFieldView = fieldViews[ i ];
 			var thisFieldViewIdent = thisFieldView.name;
-			var newValue = suppliedValues[ thisFieldViewIdent ];
 
-			if( newValue === undefined &&
-				options.resetUnsuppliedValuesToDefaults )
-			{
-				thisFieldView._resetValueToDefault();
+			if( thisFieldViewIdent ) {
+				var newValue = suppliedValues[ thisFieldViewIdent ];
+
+				if( newValue === undefined &&
+					options.resetUnsuppliedValuesToDefaults )
+				{
+					thisFieldView._resetValueToDefault();
+				}
+
+				if( newValue !== undefined ) thisFieldView.setValue( newValue );
 			}
-
-			if( newValue !== undefined )
-				thisFieldView.setValue( newValue );
 		}
 	}
 } );

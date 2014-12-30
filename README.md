@@ -29,27 +29,9 @@ Return the current value of the field. If `immediate : true` is in options, the 
 
 Set the current value of the field. If `newValue` is not the same as the current value, a `change` message is spawned using [Backbone.Courier](https://github.com/rotundasoftware/backbone.courier) (unless `slient : true` is supplied in the options hash).
 
-#### `field.processFormErrors()`
+#### `field.attemptSubmit()`
 
-Determine if the current value of the field has form errors, and if so show those errors in the UI. Returns an array of errors or an empty array if no there are no errors. The structure of each error object is up to the particular field implementation, but each object should at least define a `type` property.
-
-```javascript
-{
-	type : "exceedsMaxLength"
-}
-```
-
-In the case of nested fields, the errors array may contain an entry that enumerates the validation errors in the field's sub-fields:
-
-```javascript
-{
-	type : "childFieldViewError",
-	errors : [ {
-		type : "exceedsMaxLength"
-		childFieldView : myChildFieldView,
-	} ]
-}
-```
+// Documentation needs to be written
 
 #### `field._processValueChange()`
 
