@@ -8,9 +8,13 @@ var FieldView;
 module.exports = FieldView = BaseView.extend( {
 	className : 'modui-field',
 
-	options : [ 'name', 'width' ],
+	options : [ 'name', { 'width' : null } ],
 
-	initialize: function( options ) {
+	onMessages : {
+		'change' : '_processValueChange'
+	},
+
+	initialize : function( options ) {
 		BaseView.prototype.initialize.apply( this, arguments );
 
 		if( options ) this._value = options.value;
@@ -26,9 +30,9 @@ module.exports = FieldView = BaseView.extend( {
 	render : function() {
 		if( this.width === 'stretch' && _.isFunction( this.$el.stretch ) )
 			this.$el.stretch();
-		else if( ! _.isUndefined( this.width ) )
+		else if( this.width )
 			this.$el.width( this.width - ( this.$el.innerWidth() - this.$el.width() ) );
-		
+
 		BaseView.prototype.render.apply( this, arguments );
 		
 		this.$el.data( 'view', this );
@@ -37,7 +41,7 @@ module.exports = FieldView = BaseView.extend( {
 
 	setValue : function( originalNewValue, options ) {
 		options = _.defaults( {}, options, {
-			silent : false,
+			silent : false
 		} );
 
 		var coercedNewValue = this._coerceToValidValue( originalNewValue );
@@ -66,13 +70,13 @@ module.exports = FieldView = BaseView.extend( {
 		if( ! options.silent && ! valueDidNotChange )
 			this.spawn( 'change' );
 
-		// Once we have already attempted a submit for this field view, we update the ui for displayed form errors
-		// as soon as the value changes from then on. That way people see when they have corrected their
-		// mistakes, and the mistakes will appear immediately if they are re-done. It is important to do this after
-		// the change event is spawned so that any changes made to the UI by other code in response to this change,
-		// such as hiding or showing fields which can impact form errors, are done before we do it.
-		if( this.submitAttempted ) {
-			this.$el.removeClass( "submit-just-attempted" );
+		this.$el.removeClass( 'submit-just-attempted' );
+		
+		// If this field is currently in an error state, make sure to get rid of that state if we can.
+		// That way people see when they have corrected their mistakes immediately. It is important to do
+		// this after  the change event is spawned so that any changes made to the UI by other code in response
+		// to this change, such as hiding or showing fields, which can impact form errors, are done before we do it.
+		if( this.$el.hasClass( 'has-form-errors' ) ) {
 			this.showFormErrors( this.getFormErrors() );
 		}
 
@@ -100,7 +104,7 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	showFormErrors : function( formErrors ) {
-		this.$el.toggleClass( "has-form-errors", formErrors.length > 0 );
+		this.$el.toggleClass( 'has-form-errors', formErrors.length > 0 );
 	},
 
 	attemptSubmit : function() {
@@ -117,8 +121,8 @@ module.exports = FieldView = BaseView.extend( {
 		this.showFormErrors( formErrors );
 		if( formErrors.length ) canSubmit = false;
 
-		this.$el.removeClass( "submit-just-attempted" );
-		_.defer( function() { _this.$el.addClass( "submit-just-attempted" ); } );
+		this.$el.removeClass( 'submit-just-attempted' );
+		_.defer( function() { _this.$el.addClass( 'submit-just-attempted' ); } );
 
 		this.submitAttempted = true;
 
@@ -168,9 +172,9 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	_onSubviewsRendered : function() {
-		// _pushValue needs to go in _onSubviewsRendered, in case additional ui decoration (like 
-		// initializing jquery ui elements) is performed by descendant classes 
-		// after calling parent's 'onRender' function. If we just did _pushValue 
+		// _pushValue needs to go in _onSubviewsRendered, in case additional ui decoration (like
+		// initializing jquery ui elements) is performed by descendant classes
+		// after calling parent's 'onRender' function. If we just did _pushValue
 		// at the end of render() function, that logic would not yet be executed.
 
 		if( ! _.isUndefined( this._value ) )
@@ -269,8 +273,7 @@ module.exports = FieldView = BaseView.extend( {
 				var newValue = suppliedValues[ thisFieldViewIdent ];
 
 				if( newValue === undefined &&
-					options.resetUnsuppliedValuesToDefaults )
-				{
+					options.resetUnsuppliedValuesToDefaults ) {
 					thisFieldView._resetValueToDefault();
 				}
 
