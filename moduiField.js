@@ -107,14 +107,18 @@ module.exports = FieldView = BaseView.extend( {
 		this.$el.toggleClass( 'has-form-errors', formErrors.length > 0 );
 	},
 
-	attemptSubmit : function() {
+	attemptSubmit : function( options ) {
 		var _this = this;
 		
+		options = _.defaults( {}, options, {
+			validateHiddenChildren : false
+		} );
+
 		var canSubmit = true;
 
-		var childFieldViews = this._getChildFieldViews();
+		var childFieldViews = this._getChildFieldViews( { includeHiddenViews : options.validateHiddenChildren } );
 		_.each( childFieldViews, function( thisFieldView ) {
-			if( ! thisFieldView.attemptSubmit() ) canSubmit = false;
+			if( ! thisFieldView.attemptSubmit( options ) ) canSubmit = false;
 		} );
 
 		var formErrors = this.getFormErrors();
@@ -186,7 +190,7 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	_getChildFieldViews : function( options ) {
-		return _.values( FieldView.find( this.$el.children() ) );
+		return _.values( FieldView.find( this.$el.children(), options ) );
 	},
 
 	_renderTemplate : function( templateData ) {
