@@ -243,7 +243,8 @@ module.exports = FieldView = BaseView.extend( {
 	get : function( els, options ) {
 		options = _.extend( {
 			includeHiddenViews : false,
-			excludeUnavailableDependents : true
+			excludeUnavailableDependents : true,
+			excludeFieldsWithFormErrors : false
 		}, options );
 
 		var fieldViews = FieldView.find( els, options );
@@ -252,6 +253,9 @@ module.exports = FieldView = BaseView.extend( {
 		for( var i = 0, len = fieldViews.length; i < len; i++ ) {
 			var thisFieldView = fieldViews[ i ];
 			var thisFieldViewIdent = thisFieldView.name;
+
+			if( options.excludeFieldsWithFormErrors && thisFieldView.getFormErrors().length > 0 ) continue;
+
 			if( thisFieldViewIdent ) valueHash[ thisFieldViewIdent ] = thisFieldView.getValue();
 		}
 
@@ -262,6 +266,7 @@ module.exports = FieldView = BaseView.extend( {
 		if( suppliedValues === undefined ) throw new Error( 'Undefined hash of values to use for setFields.' );
 
 		options = _.extend( {
+			silent : false,
 			includeHiddenViews : false,
 			resetUnsuppliedValuesToDefaults : true,
 			excludeUnavailableDependents : false	// otherwise we might exclude a dependent based on the current value of its 'parent', but we may be changing that value!
@@ -281,7 +286,7 @@ module.exports = FieldView = BaseView.extend( {
 					thisFieldView._resetValueToDefault();
 				}
 
-				if( newValue !== undefined ) thisFieldView.setValue( newValue );
+				if( newValue !== undefined ) thisFieldView.setValue( newValue, { silent : options.silent } );
 			}
 		}
 	}
