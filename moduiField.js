@@ -20,7 +20,7 @@ module.exports = FieldView = BaseView.extend( {
 		if( options ) this._value = options.value;
 
 		if( _.isUndefined( this._value ) )
-			this._resetValueToDefault();
+			this._resetValueToDefault( { silent : true } );
 
 		if( this.name ) this.$el.attr( 'data-field-name', this.name );
 
@@ -68,7 +68,7 @@ module.exports = FieldView = BaseView.extend( {
 		}
 
 		if( ! options.silent && ! valueDidNotChange )
-			this.spawn( 'change' );
+			this.spawn( 'change', this._value );
 
 		this.$el.removeClass( 'submit-just-attempted' );
 		
@@ -133,10 +133,15 @@ module.exports = FieldView = BaseView.extend( {
 		return canSubmit;
 	},
 
-	_resetValueToDefault : function() {
-		var newVal = _.isObject( this.defaultValue ) ? _.clone( this.defaultValue ) : this.defaultValue;
+	_resetValueToDefault : function( options ) {
+		options = _.defaults( {}, options, { slient : true } );
+		
+		var newVal;
+		if( _.isDate( this.defaultValue ) ) newVal = new Date( this.defaultValue.getTime() );
+		else if( _.isObject( this.defaultValue ) ) newVal = _.clone( this.defaultValue );
+		else newVal = this.defaultValue;
 
-		this.setValue( newVal, { silent : false } );
+		this.setValue( newVal, { silent : options.silent } );
 	},
 
 	_pullValue : function() {
@@ -155,10 +160,10 @@ module.exports = FieldView = BaseView.extend( {
 		var childFieldViews = this._getChildFieldViews();
 
 		_.each( childFieldViews, function( thisChildFieldView ) {
-			if( ! _.isUndefined( value[ thisChildFieldView.name ] ) )
-				thisChildFieldView.setValue( value[ thisChildFieldView.name ] );
+			if( value && ! _.isUndefined( value[ thisChildFieldView.name ] ) )
+				thisChildFieldView.setValue( value[ thisChildFieldView.name ], { silent : true } );
 			else
-				thisChildFieldView._resetValueToDefault();
+				thisChildFieldView._resetValueToDefault( { silent : true } );
 		} );
 	},
 
@@ -169,7 +174,7 @@ module.exports = FieldView = BaseView.extend( {
 	_onOptionsChanged : function( changedOptions ) {
 		// make sure our value is still valid!
 		var newValue = this._coerceToValidValue( this._value );
-		if( !_.isUndefined( newValue ) ) this.setValue( newValue );
+		if( ! _.isUndefined( newValue ) ) this.setValue( newValue );
 		else this._resetValueToDefault();
 
 		this.render();
@@ -200,7 +205,12 @@ module.exports = FieldView = BaseView.extend( {
 	}
 }, {
 	find : function( els, options ) {
-		var viewElements = els.filter( '.modui-field' );
+		// we used to include the elements themselves in our search, but this was weird
+		// for example in the case of dialogs, where this.$el.fieldViews( 'get' ) was
+		// resulting in an empty object {} since the dialog itself was being counted.
+		// let's try taking the alternate approach and seeing how it goes.
+		// var viewElements = els.filter( '.modui-field' );
+		var viewElements = $();
 		viewElements = viewElements.add( els.find( '.modui-field' ) );
 
 		options = _.extend( {
@@ -283,7 +293,7 @@ module.exports = FieldView = BaseView.extend( {
 
 				if( newValue === undefined &&
 					options.resetUnsuppliedValuesToDefaults ) {
-					thisFieldView._resetValueToDefault();
+					thisFieldView._resetValueToDefault( { silent : options.silent } );
 				}
 
 				if( newValue !== undefined ) thisFieldView.setValue( newValue, { silent : options.silent } );
