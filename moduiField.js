@@ -195,7 +195,7 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	_getChildFieldViews : function( options ) {
-		return _.values( FieldView.find( this.$el.children(), options ) );
+		return _.values( FieldView.find( this.$el, options ) );
 	},
 
 	_renderTemplate : function( templateData ) {
