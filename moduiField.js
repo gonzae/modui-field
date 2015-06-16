@@ -195,7 +195,7 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	_getChildFieldViews : function( options ) {
-		return _.values( FieldView.find( this.$el, options ) );
+		return _.values( FieldView.find( this.$el.children(), options ) );
 	},
 
 	_renderTemplate : function( templateData ) {
@@ -208,9 +208,15 @@ module.exports = FieldView = BaseView.extend( {
 		// we used to include the elements themselves in our search, but this was weird
 		// for example in the case of dialogs, where this.$el.fieldViews( 'get' ) was
 		// resulting in an empty object {} since the dialog itself was being counted.
-		// let's try taking the alternate approach and seeing how it goes.
-		// var viewElements = els.filter( '.modui-field' );
-		var viewElements = $();
+		// let's try taking the alternate approach and seeing how it goes. Now we switched
+		// back, because otherwise there is no way to select just particular field views using
+		// a jquery selector. For example, take
+		// this.ui.myDiv.find( 'modui-field:first-child' ).fieldViews( 'align' );
+		// if we dont include the field views themselves, we can't align these guys. So instead
+		// we are now finding field views in els.children() in 'get' and 'set', so this
+		// approach should work for both of the cases above, although it is a bit inconsistent.
+		var viewElements = els.filter( '.modui-field' );
+		// var viewElements = $();
 		viewElements = viewElements.add( els.find( '.modui-field' ) );
 
 		options = _.extend( {
@@ -257,7 +263,7 @@ module.exports = FieldView = BaseView.extend( {
 			excludeFieldsWithFormErrors : false
 		}, options );
 
-		var fieldViews = FieldView.find( els, options );
+		var fieldViews = FieldView.find( els.children(), options );
 		var valueHash = {};
 
 		for( var i = 0, len = fieldViews.length; i < len; i++ ) {
@@ -278,11 +284,11 @@ module.exports = FieldView = BaseView.extend( {
 		options = _.extend( {
 			silent : false,
 			includeHiddenViews : false,
-			resetUnsuppliedValuesToDefaults : true,
+			resetUnsuppliedValuesToDefaults : false,
 			excludeUnavailableDependents : false	// otherwise we might exclude a dependent based on the current value of its 'parent', but we may be changing that value!
 		}, options );
 
-		var fieldViews = FieldView.find( els, options );
+		var fieldViews = FieldView.find( els.children(), options );
 
 		for( var i = 0, len = fieldViews.length; i < len; i++ ) {
 			var thisFieldView = fieldViews[ i ];
