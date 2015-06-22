@@ -1,6 +1,6 @@
 {
   "name": "modui-field",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "baseFieldView =============",
   "main": "moduiField.js",
   "scripts": {
