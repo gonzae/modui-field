@@ -62,7 +62,7 @@ module.exports = FieldView = BaseView.extend( {
 			// but seems a little weird. There is probably next to no performance
 			// hit by pulling the value twice so we'll leave this as-is for now.
 			
-			if( ! _.isEqual( this._pullValue(), this._value ) ) {
+			if( ! this._pullValue || ( ! _.isEqual( this._pullValue(), this._value ) ) ) {
 				this._pushValue( this._value );
 			}
 		}
