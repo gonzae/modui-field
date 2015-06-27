@@ -52,6 +52,8 @@ module.exports = FieldView = BaseView.extend( {
 			this._value = coercedNewValue;
 		}
 
+		// this is a test to ensure that the view has been rendered. otherwise, it makes
+		// no sense to push the value (and will cause errors). kind weird. maybe we can take it out?
 		if( this.$el.children().length > 0 ) {
 			// make sure our ui is in sync. If the new value is invalid (in which
 			// case this._value is still our old value), or if it needed to be
@@ -100,7 +102,20 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	getFormErrors : function( options ) {
-		return [];
+		var options = _.defaults( {}, options, { recurse : false } );
+		var formErrors = [];
+
+		if( options.recurse ) {
+			formErrors = formErrors.concat( _.reduce( this.$el.children().fieldViews( 'find' ), function( memo, thisFieldView ) {
+				return memo.concat( _.map( thisFieldView.getFormErrors( { recurse : true } ), function( thisFormError ) {
+					thisFormError.type = 'childError';
+					thisFormError.fieldName = thisFieldView.name;
+					return thisFormError;
+				} ) );
+			}, [] ) );
+		}
+
+		return formErrors;
 	},
 
 	showFormErrors : function( formErrors ) {
@@ -208,9 +223,10 @@ module.exports = FieldView = BaseView.extend( {
 		// we used to include the elements themselves in our search, but this was weird
 		// for example in the case of dialogs, where this.$el.fieldViews( 'get' ) was
 		// resulting in an empty object {} since the dialog itself was being counted.
-		// let's try taking the alternate approach and seeing how it goes. Now we switched
-		// back, because otherwise there is no way to select just particular field views using
-		// a jquery selector. For example, take
+		// let's try taking the alternate approach and seeing how it goes.
+		// ******* WAIT ********
+		// Now we switched back, because otherwise there is no way to select just 
+		// particular field views using a jquery selector. For example, take
 		// this.ui.myDiv.find( 'modui-field:first-child' ).fieldViews( 'align' );
 		// if we dont include the field views themselves, we can't align these guys. So instead
 		// we are now finding field views in els.children() in 'get' and 'set', so this
