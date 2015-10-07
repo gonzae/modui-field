@@ -17,8 +17,8 @@
   },
   "homepage": "https://github.com/rotundasoftware/baseFieldView",
   "dependencies": {
-    "modui-base": "~0.1.2",
     "jquery": "~2.1.1",
+    "modui-base": "^0.1.8",
     "underscore": "~1.6.0"
   }
 }

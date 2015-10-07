@@ -8,7 +8,7 @@ var FieldView;
 module.exports = FieldView = BaseView.extend( {
 	className : 'modui-field',
 
-	options : [ 'name', { 'width' : null } ],
+	options : [ 'name', { 'defaultValue' : null } ],
 
 	onMessages : {
 		'change' : '_processValueChange'
@@ -28,15 +28,12 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	render : function() {
-		if( this.width === 'stretch' && _.isFunction( this.$el.stretch ) )
-			this.$el.stretch();
-		else if( this.width )
-			this.$el.width( this.width - ( this.$el.innerWidth() - this.$el.width() ) );
-
 		BaseView.prototype.render.apply( this, arguments );
 		
 		this.$el.data( 'view', this );
 		this.$el.attr( 'data-name', this.fieldName );
+
+		return this;
 	},
 
 	setValue : function( originalNewValue, options ) {
@@ -149,7 +146,7 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	_resetValueToDefault : function( options ) {
-		options = _.defaults( {}, options, { slient : true } );
+		options = _.defaults( {}, options, { silent : true } );
 		
 		var newVal;
 		if( _.isDate( this.defaultValue ) ) newVal = new Date( this.defaultValue.getTime() );
@@ -172,7 +169,7 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	_pushValue : function( value ) {
-		var childFieldViews = this._getChildFieldViews();
+		var childFieldViews = this._getChildFieldViews( { includeHiddenViews : true } );
 
 		_.each( childFieldViews, function( thisChildFieldView ) {
 			if( value && ! _.isUndefined( value[ thisChildFieldView.name ] ) )
