@@ -103,7 +103,7 @@ module.exports = FieldView = BaseView.extend( {
 		var formErrors = [];
 
 		if( options.recurse ) {
-			formErrors = formErrors.concat( _.reduce( this.$el.children().fieldViews( 'find' ), function( memo, thisFieldView ) {
+			formErrors = formErrors.concat( _.reduce( this._getChildFieldViews(), function( memo, thisFieldView ) {
 				return memo.concat( _.map( thisFieldView.getFormErrors( { recurse : true } ), function( thisFormError ) {
 					var childError = {
 						type : 'childError',
@@ -193,7 +193,8 @@ module.exports = FieldView = BaseView.extend( {
 		if( ! _.isUndefined( newValue ) ) this.setValue( newValue );
 		else this._resetValueToDefault();
 
-		this.render();
+		// this.render(); we used to re-render here, but that takes too much control away from
+		// derived classes. if there are focus issues, for example, no way to get around.
 	},
 
 	_onSubviewsRendered : function() {
