@@ -49,9 +49,9 @@ module.exports = FieldView = BaseView.extend( {
 			this._value = coercedNewValue;
 		}
 
-		// this is a test to ensure that the view has been rendered. otherwise, it makes
+		// this is a test to ensure that the view has been initialized and rendered. otherwise, it makes
 		// no sense to push the value (and will cause errors). kind weird. maybe we can take it out?
-		if( this.$el.children().length > 0 ) {
+		if( this.$el && this.$el.children().length > 0 ) {
 			// make sure our ui is in sync. If the new value is invalid (in which
 			// case this._value is still our old value), or if it needed to be
 			// coerced, then we will need to push our new value to the ui.
@@ -213,6 +213,10 @@ module.exports = FieldView = BaseView.extend( {
 
 	_getChildFieldViews : function( options ) {
 		return _.values( FieldView.find( this.$el.children(), options ) );
+	},
+
+	_getTemplateData : function() {
+		return { value : this._value };
 	},
 
 	_renderTemplate : function( templateData ) {
