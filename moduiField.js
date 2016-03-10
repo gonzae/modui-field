@@ -99,21 +99,33 @@ module.exports = FieldView = BaseView.extend( {
 	},
 
 	getFormErrors : function( options ) {
-		var options = _.defaults( {}, options, { recurse : false } );
+		var options = _.defaults( {}, options, { recurse : false, flat : false } );
 		var formErrors = [];
 
 		if( options.recurse ) {
-			formErrors = formErrors.concat( _.reduce( this._getChildFieldViews(), function( memo, thisFieldView ) {
-				return memo.concat( _.map( thisFieldView.getFormErrors( { recurse : true } ), function( thisFormError ) {
-					var childError = {
-						type : 'childError',
-						fieldView : thisFieldView,
-						error : thisFormError
-					};
-					
-					return childError;
-				} ) );
-			}, [] ) );
+			if ( options.flat ) {
+				formErrors = _.flatten( formErrors.concat( _.reduce( this._getChildFieldViews(), function( memo, thisFieldView ) {
+					return memo.concat( _.map( thisFieldView.getFormErrors( { recurse : true, flat : true } ), function( thisFormError ) {
+						var childError = {
+							type : 'childError',
+							fieldView : thisFieldView
+						};
+						return [ childError, thisFormError ];
+					} ) );
+				}, [] ) ) );
+			} else {
+				formErrors = formErrors.concat( _.reduce( this._getChildFieldViews(), function( memo, thisFieldView ) {
+					return memo.concat( _.map( thisFieldView.getFormErrors( { recurse : true } ), function( thisFormError ) {
+						var childError = {
+							type : 'childError',
+							fieldView : thisFieldView,
+							error : thisFormError
+						};
+
+						return childError;
+					} ) );
+				}, [] ) );
+			}
 		}
 
 		return formErrors;
