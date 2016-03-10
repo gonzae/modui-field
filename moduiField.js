@@ -110,6 +110,7 @@ module.exports = FieldView = BaseView.extend( {
 							type : 'childError',
 							fieldView : thisFieldView
 						};
+						thisFormError.fieldView = thisFieldView;
 						return [ childError, thisFormError ];
 					} ) );
 				}, [] ) ) );
