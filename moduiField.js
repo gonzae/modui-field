@@ -106,12 +106,8 @@ module.exports = FieldView = BaseView.extend( {
 			if ( options.flat ) {
 				formErrors = _.flatten( formErrors.concat( _.reduce( this._getChildFieldViews(), function( memo, thisFieldView ) {
 					return memo.concat( _.map( thisFieldView.getFormErrors( { recurse : true, flat : true } ), function( thisFormError ) {
-						var childError = {
-							type : 'childError',
-							fieldView : thisFieldView
-						};
 						thisFormError.fieldView = thisFieldView;
-						return [ childError, thisFormError ];
+						return thisFormError;
 					} ) );
 				}, [] ) ) );
 			} else {
